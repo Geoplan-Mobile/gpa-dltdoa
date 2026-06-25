@@ -1,0 +1,4 @@
+# 이 저장소는 정적 Maven 저장소다 — AAR/JAR 산출물을 "의도적으로" 추적한다.
+# 전역(~/.gitignore) 설정이 *.aar / *.jar 를 무시하므로, negation 으로 되살린다.
+!*.aar
+!*.jar
