@@ -21,11 +21,19 @@
 저장소(raw URL)와 의존성을 추가한다. **인증 토큰이 필요 없다.**
 
 ```gradle
-// settings.gradle  (dependencyResolutionManagement) 또는 모듈 build.gradle 의 repositories
-repositories {
-    google()
-    mavenCentral()   // transitive 의존성(commons-math3, jts-core, slf4j-api) 자동 해결
-    maven { url "https://raw.githubusercontent.com/Geoplan-Mobile/gpa-dltdoa/main/repository" }
+// settings.gradle 의 dependencyResolutionManagement.repositories 에 선언한다.
+// (AGP 기본값 RepositoriesMode.FAIL_ON_PROJECT_REPOS 에서는 모듈 build.gradle 의
+//  repositories 가 빌드 실패를 일으키므로, 반드시 settings.gradle 에 둔다.)
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()   // transitive 의존성(commons-math3, jts-core, slf4j-api) 자동 해결
+        maven {
+            // ※ 웹 UI 도메인 'github.com' 이 아니라 파일 원본 서빙 도메인 'raw.githubusercontent.com' (같은 repo)
+            url "https://raw.githubusercontent.com/Geoplan-Mobile/gpa-dltdoa/main/repository"
+            content { includeGroup "kr.geoplan.android.lib" }   // 이 저장소엔 이 그룹만 질의(불필요한 404 방지)
+        }
+    }
 }
 ```
 
@@ -35,6 +43,9 @@ dependencies {
     implementation 'kr.geoplan.android.lib:gpa-dltdoa:1.1.1'
 }
 ```
+
+> **저장소 URL이 `raw.githubusercontent.com` 인 이유**
+> 같은 repo 를 GitHub 은 두 도메인으로 서빙한다. 사람이 브라우저로 볼 땐 웹 UI 인 `github.com/Geoplan-Mobile/gpa-dltdoa`, Gradle 이 파일을 받아갈 땐 원본 바이트를 주는 `raw.githubusercontent.com/Geoplan-Mobile/gpa-dltdoa/main/repository` 다(`main` 은 브랜치명). **둘은 같은 저장소**이며, Maven url 에는 파일 원본을 주는 `raw...` 를 써야 한다(`github.com` 을 쓰면 AAR 대신 HTML 이 와서 깨진다).
 
 ### 2. DlTdoaPositioner 생성 및 측정값 주입
 
